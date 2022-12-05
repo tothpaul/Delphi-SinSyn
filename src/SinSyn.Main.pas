@@ -123,6 +123,7 @@ implementation
 
 const
   CONF_FILE = 'SinSyn.json';
+  SAMPLES_PER_SEC = 48000;
 
 function RoundUp10(x: Single): Single;
 begin
@@ -153,7 +154,7 @@ begin
   Format.wFormatTag      := WAVE_FORMAT_PCM;
 {$ENDIF}
   Format.nChannels       := 1;
-  Format.nSamplesPerSec  := 48000;
+  Format.nSamplesPerSec  := SAMPLES_PER_SEC;
   Format.wBitsPerSample  := 8 * SizeOf(TSampleType);
   Format.nBlockAlign     := Format.nChannels * SizeOf(TSampleType);
   Format.nAvgBytesPerSec := Format.nSamplesPerSec * Format.nBlockAlign;
@@ -182,11 +183,8 @@ begin
   test();
   SetupFormat(WaveFormat);
 
-  if waveOutOpen(@WaveOut, WAVE_MAPPER, @WaveFormat, 0, 0, CALLBACK_NULL) = MMSYSERR_NOERROR then
-  begin
-    Waves[0].Setup(WaveOut, WaveFormat.nSamplesPerSec);
-    Waves[1].Setup(WaveOut, WaveFormat.nSamplesPerSec);
-  end;
+  if waveOutOpen(@WaveOut, WAVE_MAPPER, @WaveFormat, 0, 0, CALLBACK_NULL) <> MMSYSERR_NOERROR then
+    RaiseLastOSError;
 
   curveGraph.yMin := -1;
   curveGraph.yMax := +1;
@@ -272,6 +270,7 @@ begin
   PlayWav := 1 - PlayWav;
   with Waves[PlayWav] do
   begin
+    Setup(WaveOut, Ceil(SAMPLES_PER_SEC * gParms.duration));
     for Index := 0 to Length(Data) - 1 do
     begin
     {$IFDEF WAVE_FORMAT_IEEE_FLOAT}
