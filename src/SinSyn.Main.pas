@@ -163,24 +163,10 @@ end;
 
 { TMain }
 
-procedure test;
-var
-  H: TWaveHeader;
-  F: TFileStream;
-begin
-  F := TFileStream.Create('Sound.wav', fmOpenRead);
-  try
-    F.Read(H, SizeOf(H));
-  finally
-    F.Free;
-  end;
-end;
-
 procedure TMain.FormCreate(Sender: TObject);
 var
   WaveFormat: TWaveFormatEx;
 begin
-  test();
   SetupFormat(WaveFormat);
 
   if waveOutOpen(@WaveOut, WAVE_MAPPER, @WaveFormat, 0, 0, CALLBACK_NULL) <> MMSYSERR_NOERROR then
